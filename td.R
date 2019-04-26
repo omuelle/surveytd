@@ -56,19 +56,19 @@ res <- map(names(tsl), function(var) {
     # ytd <- window(ytd, end = dateToTime(date))
     # list(ytd=ytd, sel_vars=sel_vars)
     
-    # Standard chowlin
-    X <- do.call(cbind, tslq)
-    beta <- lassoBIC(yq, X)$beta
-    rho <- estimAR1(yq, X, beta)
-    ytd <- chowlin(yq, tslm_fullq, beta, rho)
-    ytd <- window(ytd, end = dateToTime(date))
-    list(ytd=ytd, beta=beta, rho=rho)
-    
-    # # LassoAR1 chowlin
-    # res <- lassoAR1(yq, tslq)
-    # ytd <- chowlin(yq, tslm_fullq, res$beta, res$rho)
+    # # Standard chowlin
+    # X <- do.call(cbind, tslq)
+    # beta <- lassoBIC(yq, X)$beta
+    # rho <- estimAR1(yq, X, beta)
+    # ytd <- chowlin(yq, tslm_fullq, beta, rho)
     # ytd <- window(ytd, end = dateToTime(date))
-    # list(ytd=ytd, beta=res$beta, rho=res$rho, iter=res$iter)
+    # list(ytd=ytd, beta=beta, rho=rho)
+    
+    # LassoAR1 chowlin
+    res <- lassoAR1(yq, tslq)
+    ytd <- chowlin(yq, tslm_fullq, res$beta, res$rho)
+    ytd <- window(ytd, end = dateToTime(date))
+    list(ytd=ytd, beta=res$beta, rho=res$rho, iter=res$iter)
     
     # # EM
     # ytd <- em(yq, tslm, nr_comp=1)
@@ -85,7 +85,7 @@ names(res) <- names(tsl)
 Sys.time() - t_start
 
 # Assign name and store
-ver <- "hd"
+ver <- "ar1_chowlin"
 assign(paste0("res_", ver), get("res"))
 save(list = paste0("res_", ver), file = paste0("results/res_", ver, ".RData"))
 
