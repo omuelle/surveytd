@@ -1,4 +1,17 @@
 
+addColumnAggregate <- function(table, func, row_name)
+{
+  total_row <- lapply(table, function(col) if(is.numeric(col)) func(col) else row_name)
+  rbind(table, do.call("data.table", total_row))
+}
+
+roundTable <- function(table, digits=2)
+{
+  res <- do.call(data.table, lapply(table, function(col) if(is.numeric(col)) round(col, digits) else col))
+  names(res) <- names(table)
+  res
+}
+
 addMonths <- function(date, months) 
 {
   m <- data.table::month(date)-1+months
@@ -80,8 +93,23 @@ corTS <- function(a, b)
   cor(window(a, from, to), window(b, from, to))
 }
 
-rmse <- function(a, b)
+
+extractMonths <- function(series, months)
 {
-  sqrt(mean((a - b)^2))
+  series[month(timeToDate(time(series))) %in% months]
+}
+
+mse <- function(a, b, months = NULL)
+{
+  diff <- a - b
+  if(!is.null(months)) {
+    diff <- extractMonths(diff, months)
+  }
+  mean(diff^2)
+}
+
+rmse <- function(a, b, months = NULL)
+{
+  sqrt(mse(a, b, months))
 }
 
